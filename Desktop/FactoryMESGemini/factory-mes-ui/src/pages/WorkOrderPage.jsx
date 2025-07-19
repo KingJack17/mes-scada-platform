@@ -3,8 +3,8 @@ import {
   getAllWorkOrders,
   deleteWorkOrder,
   createWorkOrder,
-  updateWorkOrderStatus,
   updateWorkOrder,
+  updateWorkOrderStatus,
   getAllProducts,
   getAllMachines
 } from '../services/apiService';
@@ -15,14 +15,16 @@ const statusTextMap = {
   'InProgress': 'Üretimde',
   'Completed': 'Tamamlandı',
   'Canceled': 'İptal',
-  'Pending': 'Beklemede'
+  'Pending': 'Beklemede',
+  'Planlandı': 'Planlandı'
 };
 
 const statusColors = {
-  InProgress: 'bg-blue-200 text-blue-800',
-  Completed: 'bg-green-200 text-green-800',
-  Canceled: 'bg-red-200 text-red-800',
-  Pending: 'bg-yellow-200 text-yellow-800'
+  'Planlandı': 'bg-gray-200 text-gray-800',
+  'InProgress': 'bg-blue-200 text-blue-800',
+  'Completed': 'bg-green-200 text-green-800',
+  'Canceled': 'bg-red-200 text-red-800',
+  'Pending': 'bg-yellow-200 text-yellow-800'
 };
 
 const WorkOrderPage = () => {
@@ -93,38 +95,51 @@ const WorkOrderPage = () => {
     setEditingWorkOrder(null);
   };
 
+  // === GÜNCELLENEN VE HATAYI ÇÖZEN FONKSİYON ===
   const handleFormSubmit = async (formData) => {
-  try {
-    const cleanData = {
-      id: formData.id,
-      orderNumber: formData.orderNumber,
-      productId: Number(formData.productId),
-      machineId: Number(formData.machineId),
-      plannedQuantity: Number(formData.plannedQuantity),
-      plannedStartDate: new Date(formData.plannedStartDate).toISOString(),
-      plannedEndDate: new Date(formData.plannedEndDate).toISOString(),
-      status: formData.status
-    };
+    try {
+      if (editingWorkOrder) {
+        // --- DÜZENLEME SENARYOSU ---
+        // Backend'deki UpdateWorkOrderDto'ya tam olarak uyan bir veri paketi hazırlıyoruz.
+        const updateData = {
+          id: editingWorkOrder.id,
+          orderNumber: formData.orderNumber,
+          productId: Number(formData.productId),
+          machineId: Number(formData.machineId),
+          plannedQuantity: Number(formData.plannedQuantity),
+          plannedStartDate: new Date(formData.plannedStartDate).toISOString(),
+          plannedEndDate: new Date(formData.plannedEndDate).toISOString(),
+          status: formData.status
+        };
+        await updateWorkOrder(editingWorkOrder.id, updateData);
+      } else {
+        // --- YENİ KAYIT SENARYOSU ---
+        // Backend'deki CreateWorkOrderDto'ya tam olarak uyan bir veri paketi hazırlıyoruz.
+        // Bu DTO'da machineId olmadığını unutmuyoruz.
+        const createData = {
+          orderNumber: formData.orderNumber,
+          productId: Number(formData.productId),
+          plannedQuantity: Number(formData.plannedQuantity),
+          plannedStartDate: new Date(formData.plannedStartDate).toISOString(),
+          plannedEndDate: new Date(formData.plannedEndDate).toISOString()
+        };
+        await createWorkOrder(createData);
+      }
 
-    if (formData?.id) {
-      await updateWorkOrder(formData.id, cleanData);
-    } else {
-      await createWorkOrder(cleanData);
+      handleCloseForm();
+      loadWorkOrders();
+
+    } catch (err) {
+      alert('İşlem sırasında bir hata oluştu: ' + (err.response?.data?.title || err.response?.data || err.message));
+      console.error(err);
     }
-
-    handleCloseForm();
-    loadWorkOrders();
-  } catch (err) {
-    alert('İş emri kaydında hata oluştu: ' + (err.response?.data || err.message));
-    console.error(err);
-  }
-};
-
+  };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
       await updateWorkOrderStatus(id, { status: newStatus });
       setStatusDropdownOpenId(null);
+      // Listeyi yeniden çekmek yerine state'i anlık güncellemek daha iyi bir kullanıcı deneyimi sunar
       setWorkOrders(prev =>
         prev.map(wo => wo.id === id ? { ...wo, status: newStatus } : wo)
       );
@@ -142,7 +157,7 @@ const WorkOrderPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">İş Emirleri Yönetimi</h1>
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => handleOpenForm(null)}
             className="inline-flex items-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition"
           >
             {showForm ? 'Formu Kapat' : (<><Plus size={16} /> Yeni İş Emri Ekle</>)}

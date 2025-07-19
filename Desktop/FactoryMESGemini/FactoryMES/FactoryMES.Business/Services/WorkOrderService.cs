@@ -129,13 +129,13 @@ namespace FactoryMES.Business.Services
 
             workOrder.OrderNumber = dto.OrderNumber;
             workOrder.ProductId = dto.ProductId;
-            workOrder.MachineId = dto.MachineId;
+            // machineId güncellenmiyor, mevcut değeri korunuyor.
             workOrder.PlannedQuantity = dto.PlannedQuantity;
-            workOrder.PlannedStartDate = dto.PlannedStartDate;
-            workOrder.PlannedEndDate = dto.PlannedEndDate;
             workOrder.Status = dto.Status;
+            workOrder.PlannedStartDate = DateTime.Parse(dto.PlannedStartDate).ToUniversalTime();
+            workOrder.PlannedEndDate = DateTime.Parse(dto.PlannedEndDate).ToUniversalTime();
 
-            _unitOfWork.WorkOrders.Update(workOrder); 
+            _unitOfWork.WorkOrders.Update(workOrder);
             await _unitOfWork.CompleteAsync();
 
             return true;

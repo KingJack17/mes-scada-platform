@@ -68,7 +68,7 @@ namespace FactoryMES.Business.Services
             // Sorguya Process'i de dahil ediyoruz.
             var machines = await _unitOfWork.Machines.GetQueryable()
                                        .Include(m => m.MachineType)
-                                       .Include(m => m.Process) // YENİ EKLENDİ
+                                       .Include(m => m.Process) 
                                        .Where(m => !m.IsDeleted)
                                        .ToListAsync();
 
@@ -83,8 +83,8 @@ namespace FactoryMES.Business.Services
                 Status = m.Status,
                 MachineTypeId = m.MachineTypeId,
                 MachineTypeName = m.MachineType?.Name,
-                ProcessId = m.ProcessId, // YENİ EKLENDİ
-                ProcessName = m.Process?.Name // YENİ EKLENDİ
+                ProcessId = m.ProcessId, 
+                ProcessName = m.Process?.Name 
             });
         }
 
@@ -103,8 +103,8 @@ namespace FactoryMES.Business.Services
                 Status = machine.Status,
                 MachineTypeId = machine.MachineTypeId,
                 MachineTypeName = machine.MachineType?.Name,
-                ProcessId = machine.ProcessId, // YENİ EKLENDİ
-                ProcessName = machine.Process?.Name // YENİ EKLENDİ
+                ProcessId = machine.ProcessId, 
+                ProcessName = machine.Process?.Name 
             };
         }
 
@@ -120,7 +120,7 @@ namespace FactoryMES.Business.Services
             machineFromDb.AssetTag = machineDto.AssetTag;
             machineFromDb.Status = machineDto.Status;
             machineFromDb.MachineTypeId = machineDto.MachineTypeId;
-            machineFromDb.ProcessId = machineDto.ProcessId; // YENİ EKLENDİ
+            machineFromDb.ProcessId = machineDto.ProcessId; 
 
             await _unitOfWork.CompleteAsync();
             return true;

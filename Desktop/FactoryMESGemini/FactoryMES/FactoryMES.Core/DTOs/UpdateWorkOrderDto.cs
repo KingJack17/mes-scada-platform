@@ -1,11 +1,22 @@
-﻿public class UpdateWorkOrderDto
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace FactoryMES.Core.DTOs
 {
-    public int Id { get; set; }
-    public string OrderNumber { get; set; }
-    public int ProductId { get; set; }
-    public int MachineId { get; set; }
-    public int PlannedQuantity { get; set; }
-    public DateTime PlannedStartDate { get; set; }
-    public DateTime PlannedEndDate { get; set; }
-    public string Status { get; set; }
+    public class UpdateWorkOrderDto
+    {
+        [Required]
+        public int Id { get; set; }
+        [Required]
+        public string OrderNumber { get; set; }
+        [Required]
+        public int ProductId { get; set; }
+       
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int PlannedQuantity { get; set; }
+        public string PlannedStartDate { get; set; }
+        public string PlannedEndDate { get; set; }
+        public string Status { get; set; }
+    }
 }
