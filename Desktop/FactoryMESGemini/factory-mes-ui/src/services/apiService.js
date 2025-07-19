@@ -75,6 +75,15 @@ export const getMonthlyActivity = () => {
 export const getDailyProduction = (lastDays = 30) => {
     return api.get(`/dashboard/daily-production/${lastDays}`);
 };
+
+export const getOeeForMachine = (machineId, from, to) => {
+    // Tarihleri, backend'in bekleyeceği standart ISO formatına çeviriyoruz.
+    const fromISO = from.toISOString();
+    const toISO = to.toISOString();
+    // Korumalı endpoint olduğu için 'api' instance'ını kullanıyoruz.
+    return api.get(`/oee/${machineId}?from=${fromISO}&to=${toISO}`);
+};
+
 // === USERS FONKSİYONU ===
 export const getAllUsers = () => api.get('/users');
 export const assignRoleToUser = (userId, roleId) => api.post(`/users/${userId}/roles`, { roleId });
@@ -87,10 +96,49 @@ export const deleteUser = (id) => {
     return api.delete(`/users/${id}`);
 };
 
-export const getOeeForMachine = (machineId, from, to) => {
-    // Tarihleri, backend'in bekleyeceği standart ISO formatına çeviriyoruz.
-    const fromISO = from.toISOString();
-    const toISO = to.toISOString();
+// === YENİ İZLENEBİLİRLİK FONKSİYONU ===
+export const getTraceabilityBySerialNumber = (serialNumber) => {
     // Korumalı endpoint olduğu için 'api' instance'ını kullanıyoruz.
-    return api.get(`/oee/${machineId}?from=${fromISO}&to=${toISO}`);
+    // `encodeURIComponent` , seri numarasında olabilecek özel karakterler için bir güvenlik önlemidir.
+    return api.get(`/traceability/by-serial?serialNumber=${encodeURIComponent(serialNumber)}`);
 };
+
+// === YENİ PROSES FONKSİYONLARI BAŞLANGICI ===
+export const getAllProcesses = () => {
+    return api.get('/processes');
+};
+
+export const createProcess = (processDto) => {
+    return api.post('/processes', processDto);
+};
+
+export const updateProcess = (id, processDto) => {
+    return api.put(`/processes/${id}`, processDto);
+};
+
+export const deleteProcess = (id) => {
+    return api.delete(`/processes/${id}`);
+};
+// === YENİ PROSES FONKSİYONLARI BİTİŞİ ===
+
+// === YENİ ROTA FONKSİYONLARI BAŞLANGICI ===
+export const getRouteForProduct = (productId) => {
+    return api.get(`/routes/product/${productId}`);
+};
+
+export const addStepToRoute = (routeStepDto) => {
+    return api.post('/routes', routeStepDto);
+};
+
+export const updateRouteStep = (routeId, routeStepDto) => {
+    return api.put(`/routes/${routeId}`, routeStepDto);
+};
+
+export const deleteRouteStep = (routeId) => {
+    return api.delete(`/routes/${routeId}`);
+};
+
+export const getMachinesByProcess = (processId) => {
+    return api.get(`/machines/by-process/${processId}`);
+};
+// === YENİ ROTA FONKSİYONLARI BİTİŞİ ===

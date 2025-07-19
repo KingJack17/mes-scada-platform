@@ -12,5 +12,9 @@ public interface IUnitOfWork : IDisposable
     IUserRoleRepository UserRoles { get; }
     IProductionDataRepository ProductionData { get; }
     IMachineStatusLogRepository MachineStatusLogs { get; }
+    ITraceableUnitRepository TraceableUnits { get; }
+    ITraceableUnitHistoryRepository TraceableUnitHistories { get; }
+    IProcessRepository Processes { get; }
+    IRouteRepository Routes { get; }
     Task<int> CompleteAsync();
 }

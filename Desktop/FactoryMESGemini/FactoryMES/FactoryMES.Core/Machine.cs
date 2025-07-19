@@ -14,6 +14,11 @@ namespace FactoryMES.Core
         public int MachineTypeId { get; set; }
         public bool IsDeleted { get; set; } = false;
         public double IdealCycleTimeSeconds { get; set; }
+        // YENİ EKLENEN İLİŞKİ
+        [ForeignKey("Process")]
+        public int? ProcessId { get; set; }
+        public virtual Process Process { get; set; }
+
         [ForeignKey("MachineTypeId")]
         public virtual MachineType MachineType { get; set; }
         public virtual ICollection<WorkOrder> WorkOrders { get; set; }

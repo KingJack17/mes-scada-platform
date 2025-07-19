@@ -10,5 +10,7 @@
         public string Status { get; set; }
         public string MachineTypeName { get; set; } // ID yerine isim göstereceğiz.
         public int MachineTypeId { get; set; }
+        public int? ProcessId { get; set; }
+        public string ProcessName { get; set; }
     }
 }

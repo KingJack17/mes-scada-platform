@@ -2,6 +2,7 @@
 using FactoryMES.Core;
 using FactoryMES.Core.DTOs;
 using FactoryMES.Core.Interfaces;
+using Microsoft.EntityFrameworkCore; // Include için eklendi
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace FactoryMES.Business.Services
                 AssetTag = machineDto.AssetTag,
                 Status = machineDto.Status,
                 MachineTypeId = machineDto.MachineTypeId,
+                ProcessId = machineDto.ProcessId, // YENİ EKLENDİ
                 InstallationDate = System.DateTime.UtcNow,
                 IsDeleted = false
             };
@@ -34,12 +36,20 @@ namespace FactoryMES.Business.Services
             await _unitOfWork.Machines.AddAsync(machine);
             await _unitOfWork.CompleteAsync();
 
-            // Kaydedilen makineyi DTO olarak geri dön
+            // Kaydedilen makineyi tam DTO olarak geri dön
+            var createdMachine = await _unitOfWork.Machines.GetByIdAsync(machine.Id);
             return new MachineDto
             {
-                Id = machine.Id,
-                Name = machine.Name,
-                // Diğer alanları da buraya ekleyebiliriz...
+                Id = createdMachine.Id,
+                Name = createdMachine.Name,
+                Description = createdMachine.Description,
+                Location = createdMachine.Location,
+                AssetTag = createdMachine.AssetTag,
+                Status = createdMachine.Status,
+                MachineTypeId = createdMachine.MachineTypeId,
+                MachineTypeName = createdMachine.MachineType?.Name,
+                ProcessId = createdMachine.ProcessId,
+                ProcessName = createdMachine.Process?.Name
             };
         }
 
@@ -55,9 +65,14 @@ namespace FactoryMES.Business.Services
 
         public async Task<IEnumerable<MachineDto>> GetAllMachinesAsync()
         {
-            var machines = await _unitOfWork.Machines.GetAllAsync();
+            // Sorguya Process'i de dahil ediyoruz.
+            var machines = await _unitOfWork.Machines.GetQueryable()
+                                       .Include(m => m.MachineType)
+                                       .Include(m => m.Process) // YENİ EKLENDİ
+                                       .Where(m => !m.IsDeleted)
+                                       .ToListAsync();
 
-            // Entity listesini DTO listesine çeviriyoruz (Mapping)
+            // DTO'ya Process bilgisini de ekliyoruz.
             return machines.Select(m => new MachineDto
             {
                 Id = m.Id,
@@ -67,7 +82,9 @@ namespace FactoryMES.Business.Services
                 AssetTag = m.AssetTag,
                 Status = m.Status,
                 MachineTypeId = m.MachineTypeId,
-                MachineTypeName = m.MachineType?.Name //?. null kontrolü yapar
+                MachineTypeName = m.MachineType?.Name,
+                ProcessId = m.ProcessId, // YENİ EKLENDİ
+                ProcessName = m.Process?.Name // YENİ EKLENDİ
             });
         }
 
@@ -84,7 +101,10 @@ namespace FactoryMES.Business.Services
                 Location = machine.Location,
                 AssetTag = machine.AssetTag,
                 Status = machine.Status,
-                MachineTypeName = machine.MachineType?.Name
+                MachineTypeId = machine.MachineTypeId,
+                MachineTypeName = machine.MachineType?.Name,
+                ProcessId = machine.ProcessId, // YENİ EKLENDİ
+                ProcessName = machine.Process?.Name // YENİ EKLENDİ
             };
         }
 
@@ -100,6 +120,7 @@ namespace FactoryMES.Business.Services
             machineFromDb.AssetTag = machineDto.AssetTag;
             machineFromDb.Status = machineDto.Status;
             machineFromDb.MachineTypeId = machineDto.MachineTypeId;
+            machineFromDb.ProcessId = machineDto.ProcessId; // YENİ EKLENDİ
 
             await _unitOfWork.CompleteAsync();
             return true;

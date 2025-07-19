@@ -16,6 +16,10 @@ namespace FactoryMES.DataAccess.Repositories
         public IUserRoleRepository UserRoles { get; }
         public IProductionDataRepository ProductionData { get; private set; }
         public IMachineStatusLogRepository MachineStatusLogs { get; private set; }
+        public ITraceableUnitRepository TraceableUnits { get; private set; }
+        public ITraceableUnitHistoryRepository TraceableUnitHistories { get; private set; }
+        public IProcessRepository Processes { get; private set; }
+        public IRouteRepository Routes { get; private set; }
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
@@ -28,6 +32,10 @@ namespace FactoryMES.DataAccess.Repositories
             UserRoles = new UserRoleRepository(_context);
             ProductionData = new ProductionDataRepository(_context);
             MachineStatusLogs = new MachineStatusLogRepository(_context);
+            TraceableUnits = new TraceableUnitRepository(_context);
+            TraceableUnitHistories = new TraceableUnitHistoryRepository(_context);
+            Processes = new ProcessRepository(_context);
+            Routes = new RouteRepository(context);
         }
 
         public async Task<int> CompleteAsync()

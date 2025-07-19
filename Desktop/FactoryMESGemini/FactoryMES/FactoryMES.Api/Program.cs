@@ -70,6 +70,9 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IScadaService, ScadaService>();
 builder.Services.AddScoped<IDashboardNotifier, DashboardNotifier>();
 builder.Services.AddScoped<IOeeService, OeeService>();
+builder.Services.AddScoped<ITraceabilityService, TraceabilityService>();
+builder.Services.AddScoped<IProcessService, ProcessService>();
+builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddHttpContextAccessor();
 // Diðer servisler buraya eklenecek...
 

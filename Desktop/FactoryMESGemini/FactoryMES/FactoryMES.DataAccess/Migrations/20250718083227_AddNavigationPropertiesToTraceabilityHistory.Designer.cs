@@ -3,6 +3,7 @@ using System;
 using FactoryMES.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FactoryMES.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718083227_AddNavigationPropertiesToTraceabilityHistory")]
+    partial class AddNavigationPropertiesToTraceabilityHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,9 +150,6 @@ namespace FactoryMES.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ProcessId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
@@ -157,8 +157,6 @@ namespace FactoryMES.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MachineTypeId");
-
-                    b.HasIndex("ProcessId");
 
                     b.ToTable("Machines");
                 });
@@ -505,9 +503,6 @@ namespace FactoryMES.DataAccess.Migrations
                     b.Property<decimal>("IdealCycleTimeSeconds")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("MachineId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ProcessId")
                         .HasColumnType("integer");
 
@@ -518,8 +513,6 @@ namespace FactoryMES.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MachineId");
 
                     b.HasIndex("ProcessId");
 
@@ -836,13 +829,7 @@ namespace FactoryMES.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FactoryMES.Core.Process", "Process")
-                        .WithMany()
-                        .HasForeignKey("ProcessId");
-
                     b.Navigation("MachineType");
-
-                    b.Navigation("Process");
                 });
 
             modelBuilder.Entity("FactoryMES.Core.MachineAlarmLog", b =>
@@ -975,10 +962,6 @@ namespace FactoryMES.DataAccess.Migrations
 
             modelBuilder.Entity("FactoryMES.Core.Route", b =>
                 {
-                    b.HasOne("FactoryMES.Core.Machine", "Machine")
-                        .WithMany()
-                        .HasForeignKey("MachineId");
-
                     b.HasOne("FactoryMES.Core.Process", "Process")
                         .WithMany("RouteSteps")
                         .HasForeignKey("ProcessId")
@@ -990,8 +973,6 @@ namespace FactoryMES.DataAccess.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Machine");
 
                     b.Navigation("Process");
 

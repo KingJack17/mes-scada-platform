@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  Menu, X, Factory, Package, Wrench, Users, Settings, ServerCog, ClipboardList
+  Menu, X, Factory, Package, Wrench, Users, Settings, ServerCog, ClipboardList, History, ClipboardCheck, Map // Map ikonu eklendi
 } from "lucide-react";
 
 const Sidebar = ({ isAdmin }) => {
@@ -53,6 +53,21 @@ const Sidebar = ({ isAdmin }) => {
             <Wrench className="w-5 h-5" />
             Bakım
           </NavLink>
+          <NavLink to="/traceability" className={navItemClass}>
+            <History className="w-5 h-5" />
+            İzlenebilirlik
+          </NavLink>
+          <NavLink to="/processes" className={navItemClass}>
+            <ClipboardCheck className="w-5 h-5" />
+            Prosesler
+          </NavLink>
+
+          {/* === YENİ EKLENEN LİNK === */}
+          <NavLink to="/routes" className={navItemClass}>
+            <Map className="w-5 h-5" />
+            Rotalar
+          </NavLink>
+
           {isAdmin && (
             <NavLink to="/users" className={navItemClass}>
               <Users className="w-5 h-5" />

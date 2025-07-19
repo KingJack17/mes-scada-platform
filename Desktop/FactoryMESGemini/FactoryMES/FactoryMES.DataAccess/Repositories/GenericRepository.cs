@@ -48,5 +48,9 @@ namespace FactoryMES.DataAccess.Repositories
         {
             _dbSet.Update(entity);
         }
+        public virtual IQueryable<T> GetQueryable()
+        {
+            return _dbSet.AsQueryable();
+        }
     }
 }

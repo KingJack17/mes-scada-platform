@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllProducts, getAllMachines } from '../../services/apiService';
+import { getAllProducts } from '../../services/apiService';
 import { Save, X } from 'lucide-react';
 
 // Türkçe - İngilizce eşleme
@@ -34,7 +34,6 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
   const [formData, setFormData] = useState({
     orderNumber: '',
     productId: '',
-    machineId: '',
     plannedQuantity: 1,
     plannedStartDate: toLocalISOString(new Date()),
     plannedEndDate: toLocalISOString(new Date(new Date().setDate(new Date().getDate() + 1))),
@@ -42,34 +41,25 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
   });
 
   const [products, setProducts] = useState([]);
-  const [machines, setMachines] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productRes, machineRes] = await Promise.all([
-          getAllProducts(),
-          getAllMachines(),
-        ]);
+        const productRes = await getAllProducts();
         const products = productRes.data || [];
-        const machines = machineRes.data || [];
 
         setProducts(products);
-        setMachines(machines);
 
         const defaultProductId = String(products[0]?.id || '');
-        const defaultMachineId = String(machines[0]?.id || '');
 
         setFormData((prev) => {
           if (initialData) {
             const matchedProduct = products.find(p => p.id === initialData.productId);
-            const matchedMachine = machines.find(m => m.id === initialData.machineId);
 
             return {
               orderNumber: initialData.orderNumber || '',
               productId: matchedProduct ? String(matchedProduct.id) : defaultProductId,
-              machineId: matchedMachine ? String(matchedMachine.id) : defaultMachineId,
               plannedQuantity: initialData.plannedQuantity || 1,
               plannedStartDate: toLocalISOString(new Date(initialData.plannedStartDate)),
               plannedEndDate: toLocalISOString(new Date(initialData.plannedEndDate)),
@@ -78,8 +68,7 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
           } else {
             return {
               ...prev,
-              productId: defaultProductId,
-              machineId: defaultMachineId,
+              productId: defaultProductId
             };
           }
         });
@@ -88,7 +77,6 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
       } finally {
         setIsLoading(false);
       }
-
     };
     fetchData();
   }, [initialData]);
@@ -97,9 +85,7 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['productId', 'machineId'].includes(name)
-        ? String(value)
-        : name === 'plannedQuantity'
+      [name]: name === 'plannedQuantity'
         ? parseInt(value, 10)
         : value
     }));
@@ -113,7 +99,6 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
   if (isLoading) return <p className="text-center p-4">Yükleniyor...</p>;
 
   return (
-    
     <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
@@ -153,21 +138,6 @@ const WorkOrderForm = ({ onSubmit, onCancel, initialData }) => {
           >
             {products.map(product => (
               <option key={product.id} value={String(product.id)}>{product.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Makine</label>
-          <select
-            name="machineId"
-            value={formData.machineId}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            {machines.map(machine => (
-              <option key={machine.id} value={String(machine.id)}>{machine.name}</option>
             ))}
           </select>
         </div>

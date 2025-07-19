@@ -46,17 +46,35 @@ namespace FactoryMES.Business.Services
 
         public async Task<WorkOrderDto> CreateAsync(CreateWorkOrderDto dto)
         {
+            // 1. Gerekli ürün ve rota bilgilerini veritabanından çek
             var product = await _unitOfWork.Products.GetByIdAsync(dto.ProductId);
-            if (product == null) throw new System.Exception($"ID'si {dto.ProductId} olan ürün bulunamadı.");
+            if (product == null) throw new Exception($"ID'si {dto.ProductId} olan ürün bulunamadı.");
 
-            var machine = await _unitOfWork.Machines.GetByIdAsync(dto.MachineId);
-            if (machine == null) throw new System.Exception($"ID'si {dto.MachineId} olan makine bulunamadı.");
+            var routeSteps = await _unitOfWork.Routes.GetQueryable()
+                                        .Where(r => r.ProductId == dto.ProductId)
+                                        .OrderBy(r => r.StepNumber)
+                                        .ToListAsync();
 
+            if (!routeSteps.Any())
+            {
+                throw new Exception($"'{product.Name}' ürünü için tanımlanmış bir üretim rotası bulunamadı.");
+            }
+
+            // 2. Rotanın ilk adımındaki makineyi al
+            var firstStep = routeSteps.First();
+            if (!firstStep.MachineId.HasValue)
+            {
+                throw new Exception($"'{product.Name}' ürününün ilk rota adımında bir makine tanımlanmamış.");
+            }
+            var assignedMachineId = firstStep.MachineId.Value;
+
+
+            // 3. Yeni iş emrini, bulunan makine ID'si ile oluştur
             var workOrder = new WorkOrder
             {
                 OrderNumber = dto.OrderNumber,
                 ProductId = dto.ProductId,
-                MachineId = dto.MachineId,
+                MachineId = assignedMachineId, // Makine ID'si artık rotadan otomatik geliyor
                 PlannedQuantity = dto.PlannedQuantity,
                 ActualQuantity = 0,
                 Status = "Planlandı",
@@ -67,9 +85,10 @@ namespace FactoryMES.Business.Services
             await _unitOfWork.WorkOrders.AddAsync(workOrder);
             await _unitOfWork.CompleteAsync();
 
-            // Artık GetByIdAsync ilişkili verileri de getirdiği için bu dönüşüm doğru çalışacak.
+            // 4. DTO dönüşümü için ilişkili verileri tekrar yükle
             var createdWorkOrder = await _unitOfWork.WorkOrders.GetByIdAsync(workOrder.Id);
 
+            // === DÜZELTİLMİŞ VE TAMAMLANMIŞ DÖNÜŞÜM ===
             return new WorkOrderDto
             {
                 Id = createdWorkOrder.Id,

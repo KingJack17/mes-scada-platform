@@ -1,5 +1,6 @@
 ﻿using FactoryMES.Business.Interfaces;
 using FactoryMES.Core.DTOs;
+using FactoryMES.Core.Interfaces; // IUnitOfWork için eklendi
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -12,10 +13,13 @@ namespace FactoryMES.Api.Controllers
     public class MachinesController : ControllerBase
     {
         private readonly IMachineService _machineService;
+        private readonly IUnitOfWork _unitOfWork; // Sorgulama için UnitOfWork eklendi
 
-        public MachinesController(IMachineService machineService)
+        // Constructor güncellendi
+        public MachinesController(IMachineService machineService, IUnitOfWork unitOfWork)
         {
             _machineService = machineService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -24,6 +28,16 @@ namespace FactoryMES.Api.Controllers
             var machines = await _machineService.GetAllMachinesAsync();
             return Ok(machines);
         }
+
+        // === YENİ EKLENEN ENDPOINT ===
+        [HttpGet("by-process/{processId}")]
+        public async Task<IActionResult> GetMachinesByProcess(int processId)
+        {
+            // Doğrudan UnitOfWork üzerinden, bir prosese ait olan ve silinmemiş makineleri buluyoruz.
+            var machines = await _unitOfWork.Machines.FindAsync(m => m.ProcessId == processId && !m.IsDeleted);
+            return Ok(machines);
+        }
+        // === BİTİŞ ===
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMachine(int id)
@@ -56,6 +70,5 @@ namespace FactoryMES.Api.Controllers
             if (!success) return NotFound();
             return NoContent();
         }
-
     }
 }

@@ -13,5 +13,8 @@ namespace FactoryMES.Core.DTOs
         public string Status { get; set; }
         [Required]
         public int MachineTypeId { get; set; }
+
+        [Required(ErrorMessage = "Proses ID'si zorunludur.")]
+        public int ProcessId { get; set; }
     }
 }

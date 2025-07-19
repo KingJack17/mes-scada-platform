@@ -18,5 +18,11 @@ namespace FactoryMES.Core
         public virtual TraceableUnit TraceableUnit { get; set; }
         [ForeignKey("RouteId")]
         public virtual Route RouteStep { get; set; }
+
+        [ForeignKey("MachineId")]
+        public virtual Machine Machine { get; set; } 
+
+        [ForeignKey("OperatorId")]
+        public virtual User Operator { get; set; } 
     }
 }

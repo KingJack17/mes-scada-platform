@@ -6,7 +6,7 @@ import {
   updateMachine
 } from '../services/apiService';
 import MachineForm from '../components/machines/MachineForm';
-import { Edit, Pencil, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const MachinePage = () => {
@@ -17,22 +17,19 @@ const MachinePage = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMachine, setEditingMachine] = useState(null);
 
-const loadMachines = async () => {
-  try {
-    setLoading(true);
-    const response = await getAllMachines();
-
-    // ID'ye göre büyükten küçüğe sırala
-    const sortedMachines = response.data.sort((a, b) => b.id - a.id);
-
-    setMachines(sortedMachines);
-    setError(null);
-  } catch (err) {
-    setError('Makineler yüklenirken bir sorun oluştu.');
-  } finally {
-    setLoading(false);
-  }
-};
+  const loadMachines = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllMachines();
+      const sortedMachines = response.data.sort((a, b) => b.id - a.id);
+      setMachines(sortedMachines);
+      setError(null);
+    } catch (err) {
+      setError('Makineler yüklenirken bir sorun oluştu.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadMachines();
@@ -50,18 +47,19 @@ const loadMachines = async () => {
   };
 
   const handleOpenForm = (machine = null) => {
-  if (machine) {
-    const enrichedMachine = {
-      ...machine,
-      machineTypeId: machine.machineTypeId || machine.machineType?.id || ''
-    };
-    console.log("Editlenecek veri:", enrichedMachine);
-    setEditingMachine(enrichedMachine);
-  } else {
-    setEditingMachine(null);
-  }
-  setShowForm(true);
-};
+    // Düzenleme modunda, forma hem machineTypeId hem de processId'yi doğru şekilde iletiyoruz.
+    if (machine) {
+      const enrichedMachine = {
+        ...machine,
+        machineTypeId: machine.machineTypeId || machine.machineType?.id || '',
+        processId: machine.processId || '' // processId'yi de ekliyoruz
+      };
+      setEditingMachine(enrichedMachine);
+    } else {
+      setEditingMachine(null);
+    }
+    setShowForm(true);
+  };
 
   const handleCloseForm = () => {
     setShowForm(false);
@@ -91,10 +89,10 @@ const loadMachines = async () => {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Makine Yönetimi</h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => handleOpenForm(null)}
             className="inline-flex items-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition"
           >
-            {showForm ? 'Formu Kapat' : (<><Plus size={16} /> Yeni Makine Ekle</>)}
+            <Plus size={16} /> Yeni Makine Ekle
           </button>
         </div>
       </div>
@@ -116,6 +114,8 @@ const loadMachines = async () => {
               <th className="px-4 py-3 font-semibold">Açıklama</th>
               <th className="px-4 py-3 font-semibold">Konum</th>
               <th className="px-4 py-3 font-semibold">Tipi</th>
+              {/* === YENİ BAŞLIK EKLENDİ === */}
+              <th className="px-4 py-3 font-semibold">Proses</th>
               <th className="px-4 py-3 font-semibold">Durum</th>
               <th className="px-4 py-3 font-semibold">İşlemler</th>
             </tr>
@@ -131,6 +131,8 @@ const loadMachines = async () => {
                 <td className="px-4 py-3">{machine.description}</td>
                 <td className="px-4 py-3">{machine.location}</td>
                 <td className="px-4 py-3">{machine.machineTypeName || '-'}</td>
+                {/* === YENİ SÜTUN EKLENDİ === */}
+                <td className="px-4 py-3">{machine.processName || '-'}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-3 py-1 text-xs font-semibold rounded-full
